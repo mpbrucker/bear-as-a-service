@@ -84,6 +84,7 @@ celerybeat-schedule
 
 # virtualenv
 .venv
+.virtualenv
 venv/
 ENV/
 
@@ -100,3 +101,4 @@ ENV/
 # mypy
 .mypy_cache/
 bear-secrets.txt
+

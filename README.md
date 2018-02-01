@@ -1,4 +1,5 @@
 # Bear-as-a-Service
+[![Build Status](https://travis-ci.org/olinlibrary/bear-as-a-service.svg?branch=master)](https://travis-ci.org/olinlibrary/bear-as-a-service)
 
 [![IMAGE ALT TEXT HERE](docs/images/bear-vimeo.jpg)](https://vimeo.com/248514938)
 
@@ -57,7 +58,7 @@ Send a test message to the bear:
 
 `python3 mqtt_json/send_mqtt_message.py "forget about your worries"`
 
-## Running the Server
+## Run the Server
 
 Provision a RabbitMQ server. Or, use the same server as the Twilio ⟶ MQTT
 Gateway.
@@ -68,6 +69,16 @@ On Linux and Windows, install [espeak](http://espeak.sourceforge.net).
 On macOS, the server uses the built-in `say` command, which has better quality.
 
 `python tts_worker.py`.
+
+## Test
+
+`pytest` runs the unit tests (currently just of the `mqtt_json` package).
+
+`pytest-watch` runs the tests in watch mode.
+
+`tox` runs the tests in their own virtual environment.
+This validates `requirements.txt` (and could be used to test the code in
+multiple different Python versions).
 
 ## Architecture
 

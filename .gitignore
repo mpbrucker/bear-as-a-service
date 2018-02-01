@@ -101,4 +101,4 @@ ENV/
 # mypy
 .mypy_cache/
 bear-secrets.txt
-
+.pytest_cache

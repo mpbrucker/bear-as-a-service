@@ -1,0 +1,31 @@
+﻿controller.py
+process_message – listen for text and pass it to parse_command
+parse_command – read in text and decide what to do
+- start game
+- repeat question
+- answer
+- stop game
+- coins
+- name
+- STRETCH: buy joke
+
+update_db – add leaderboard results to db
+
+count_down – bear counts down out loud
+
+text_player – takes number and message
+
+
+game.py
+- current players
+- their points
+- current question
+- questions + answers
+
+grab_questions – from open trivia DB
+
+check_answer – see whether answer was correct
+
+score_answer – add points to that person’s points
+
+read_results – bear says who won

@@ -4,7 +4,7 @@ from random import shuffle
 
 class Game(object):
 
-    def __init__(self, names):
+    def __init__(self):
         self.questions = []
         self.num_questions = 2
         self.counter = 0
@@ -77,7 +77,7 @@ class Game(object):
         """
         Add one point to a player's score
         """
-        self.players['Isa'] += 1
+        self.players[user] += 1
         print(self.players)
 
     def end_game(self):
@@ -90,7 +90,7 @@ class Game(object):
 
 
 def main():
-    g = Game(['Isa'])
+    g = Game()
     g.play_game()
 
 if __name__ == '__main__':

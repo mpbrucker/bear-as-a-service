@@ -18,7 +18,7 @@ class Game(object):
         self.grab_questions()
         for n in range(self.num_questions):
             answers = self.ask_question()
-            self.handle_answer('Isa', answers)
+            self.handle_answer(list(self.players.keys())[0], answers)
             self.counter += 1
             print('\n\n')
         self.end_game()

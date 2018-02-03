@@ -102,3 +102,4 @@ ENV/
 .mypy_cache/
 bear-secrets.txt
 .pytest_cache
+Pipfile.lock

@@ -10,5 +10,5 @@ tox
 # Example gateway
 profanityfilter~=2.0.3
 
-# MongoDB
-pymongo
+# SQL queries
+sqlalchemy

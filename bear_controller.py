@@ -16,6 +16,7 @@ SEND_TOPIC = 'speak'
 ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
+DB_PASSWORD = os.getenv('POSTGRES_KEY')
 
 assert ACCOUNT_SID, 'Error: the TWILIO_ACCOUNT_SID is not set'
 assert AUTH_TOKEN, 'Error: the TWILIO_AUTH_TOKEN is not set'

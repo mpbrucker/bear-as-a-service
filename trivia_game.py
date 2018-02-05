@@ -5,13 +5,13 @@ from db_client import DatabaseClient
 
 class Game(object):
 
-    def __init__(self):
+    def __init__(self, database_password, database_name="trivia"):
         self.questions = []
         self.num_questions = 10
         self.counter = -1
         self.players = dict()
         self.answers = []
-        self.db = DatabaseClient()
+        self.db = DatabaseClient(database_name, database_password)
 
     def play_game(self):
         """

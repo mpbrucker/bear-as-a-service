@@ -6,6 +6,7 @@ import sys
 import time
 
 import click
+from trivia_game import Game
 from twilio.rest import Client
 import mqtt_json
 
@@ -68,6 +69,7 @@ def respond_text(phone, message):
 @click.command()
 @click.option('--reply-text', default='Bear has spoken')
 def main(reply_text=None):
+    game = Game(DB_PASSWORD)
     timeout_time = time.time()
     logger.setLevel(logging.INFO)
     topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
@@ -76,7 +78,7 @@ def main(reply_text=None):
     # Essentially functions as a while loop
     for payload in mqtt_client.create_subscription_queue(topic):
 
-        if check_timeout(timeout_time) and game.counter != -1: # If we hit the timeout for the current question, move to the new one
+        if check_timeout(timeout_time) and game.counter != -1:  # If we hit the timeout for the current question, move to the new one
             respond_bear("Time's up!")
             game.get_next_question()
             timeout_time = time.time()

@@ -1,7 +1,7 @@
 import requests
 import json
 from random import shuffle
-from db_client.DatabaseClient import update_user_points
+from db_client import DatabaseClient
 
 class Game(object):
 
@@ -11,6 +11,7 @@ class Game(object):
         self.counter = -1
         self.players = dict()
         self.answers = []
+        self.db = DatabaseClient()
 
     def play_game(self):
         """
@@ -82,13 +83,6 @@ class Game(object):
     def end_game(self):
         """
         Clear game and return thanks for playing
-
-        >>> end_game()
-        Thanks for playing!
         """
         self.__init__()
         return('Thanks for playing!')
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()

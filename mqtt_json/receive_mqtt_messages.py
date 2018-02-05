@@ -2,7 +2,7 @@ import json
 import logging
 import socket
 import sys
-from queue import Queue
+import queue
 
 import click
 import paho.mqtt.client as mqtt
@@ -13,7 +13,7 @@ logger = logging.getLogger('messages')
 
 
 def create_subscription_queue(topic):
-    messages = Queue()
+    messages = queue.Queue()
 
     def on_connect(client, userdata, flags, rc):
         logger.info('connected result code=%s', str(rc))
@@ -51,10 +51,14 @@ def create_subscription_queue(topic):
             print('Continuing without subscriptions', file=sys.stderr)
 
     while True:
-        payload = json.loads(messages.get().payload.decode('utf-8'))
-        payload = {k: v[0] if isinstance(v, list) and len(v) == 1 else v
-                   for k, v in payload.items()}
-        yield payload
+        try:
+            payload = json.loads(messages.get(block=False).payload.decode('utf-8'))
+            payload = {k: v[0] if isinstance(v, list) and len(v) == 1 else v
+                       for k, v in payload.items()}
+            yield payload
+        except queue.Empty:
+            yield None
+
 
 
 @click.command()

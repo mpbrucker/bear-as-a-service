@@ -26,26 +26,32 @@ assert PHONE_NUMBER, 'Error: the TWILIO_PHONE_NUMBER is not set'
 assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
 
 mqtt_client = mqtt_json.Client()
-is_game_running = False
 
 
-def parse_command(phone, command):
+def parse_command(number, command, game):
     """
     Takes in a command input and takes action based on the command. Returns the response message and the bear message.
     """
     ## We need to parse the command
-    response_text, bear_message = None
+    response_message = "Bear has spoken."
+    is_correct = False
 
-    sanitized_command = command.translate(None, string.punctuation) # Remove punctuation to avoid injection attacks
-    command_words = sanitized_command.lower().split(maxplit=2)
+    translator = str.maketrans('', '', string.punctuation)
+    sanitized_command = command.translate(translator) # Remove punctuation to avoid injection attacks
+    print(sanitized_command)
+    command_words = sanitized_command.lower().split(maxsplit=1)
     if command_words[0] == 'trivia' and game.counter == -1:
-        game.start_game()
+        game.play_game()
         respond_bear("welcome to bear trivia tm")
         response_message = "Let's play trivia!"
+        next_q = game.get_next_question()
+        respond_bear(next_q)
     elif game.counter != -1:
-        answer = command_words[1:]
-        response_message = game.handle_answer(answer)
-    return response_message
+        answer = command_words[0]
+        is_correct, response_message = game.handle_answer(number, answer)
+
+
+    return (is_correct, response_message)
 
 
 def check_timeout(orig_time, timeout=45):
@@ -60,6 +66,7 @@ def respond_text(phone, message):
     """
     Respond to a user via text.
     """
+    logging.info("Responding to number {}".format(phone))
     client = Client(ACCOUNT_SID, AUTH_TOKEN)
     client.api.account.messages.create(
         to=phone,  # sic
@@ -75,17 +82,24 @@ def main(reply_text=None):
     topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
     logger.info('Waiting for messages on {}'.format(topic))
 
+
     # Essentially functions as a while loop
     for payload in mqtt_client.create_subscription_queue(topic):
 
-        if check_timeout(timeout_time) and game.counter != -1:  # If we hit the timeout for the current question, move to the new one
+        if check_timeout(timeout_time, timeout=20) and game.counter != -1:  # If we hit the timeout for the current question, move to the new one
             respond_bear("Time's up!")
-            game.get_next_question()
+            response_bear_text = game.get_next_question()
+            respond_bear(response_bear_text)
             timeout_time = time.time()
         if payload is not None:
-            text_response = process_message(payload)
+            is_correct, text_response = parse_command(payload['From'], payload['Body'], game)
             response_number = payload['From']
             respond_text(response_number, text_response)
+            if is_correct:
+                logging.info("Correct answer, moving to next question")
+                bear_text = game.get_next_question()
+                respond_bear("Correct answer! " + bear_text)
+                timeout_time = time.time()
 
 
 if __name__ == '__main__':

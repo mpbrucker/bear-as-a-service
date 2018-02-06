@@ -2,6 +2,7 @@ import requests
 import json
 from random import shuffle
 from db_client import DatabaseClient
+import html
 
 class Game(object):
 
@@ -48,31 +49,41 @@ class Game(object):
         """
         self.counter += 1
         current_question = self.questions[self.counter]['question']
-        answers = self.questions[self.counter]['incorrect_answers'] + [(self.questions[self.counter]['correct_answer'])]
-        shuffle(answers)
-        self.answers = ["%d: %s" % (n+1, q) for n, q in enumerate(answers)]
-        return(current_question + ', '.join(self.answers))
+        self.answers = self.questions[self.counter]['incorrect_answers'] + [(self.questions[self.counter]['correct_answer'])]
+        shuffle(self.answers)
+        answers_string = ', '.join(["%d: %s" % (n+1, q) for n, q in enumerate(self.answers)])
+        return html.unescape(current_question + ' ' + answers_string)
 
     def handle_answer(self, number, answer):
         """
         Returns string saying whether you were right or not
+
+            Arguments:
+            number: string, represents the user's phone number
+            answer: string, the user's answer
+
         """
+        is_correct = False
+        response_message = ""
+
         if number not in list(self.players.keys()):
             self.add_player(number)
-        if player_answer not in ['1','2','3','4']:
-            return('That is not a number between 1 and 4')
-        elif self.answers[int(player_answer)-1] == self.questions[self.counter]['correct_answer']:
+        if answer not in ['1','2','3','4']:
+            response_message = 'That is not a number between 1 and 4'
+        elif self.answers[int(answer)-1] == self.questions[self.counter]['correct_answer']:
             self.add_point(number)
-            return('Yay! That is correct!')
+            response_message = 'Yay! That is correct!'
+            is_correct = True
         else:
-            return('Aw that was wrong!')
+            response_message = 'Aw that was wrong!'
+        return (is_correct, response_message)
 
     def add_point(self, number):
         """
         Add one point to a player's score
         """
         self.players[number] += 1
-        update_user_points(number, 1)
+        self.db.update_user_points(number, 1)
 
     def score_player(self, number):
         """

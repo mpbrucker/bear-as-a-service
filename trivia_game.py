@@ -9,21 +9,22 @@ class Game(object):
     def __init__(self, database_password, database_name="trivia"):
         self.questions = []
         self.num_questions = 10
-        self.counter = -1
-        self.players = dict()
-        self.answers = []
-        self.db = DatabaseClient(database_name, database_password)
+        self.counter = -1 # Current round number, -1 means game has not started
+        self.players = dict() # Keys = players' numbers, values = points
+        self.answers = [] # List of answers to the current question
+        self.answered = [] # List of players that have answered in the current round
+        self.db = DatabaseClient(database_name, database_password) # Setup database
 
     def play_game(self):
         """
-        Grabs and sorts questions
+        Calls functions needed to prep game
         """
         self.grab_questions()
         self.sort_questions()
 
     def add_player(self, number):
         """
-        Adds a new player to the players dictionary and give them a score of 0
+        Adds a new player to dictionary and give them a score of 0
         """
         self.players[number] = 0
 
@@ -31,7 +32,7 @@ class Game(object):
         """
         Grabs trivia json from Open Trivia DB API tool
         """
-        r = requests.get("https://opentdb.com/api.php?amount=%d&type=multiple" % self.num_questions)
+        r = requests.get("https://opentdb.com/api.php?amount=%d&category=9&type=multiple" % self.num_questions)
         self.questions = r.json()['results']
 
     def sort_questions(self):
@@ -47,6 +48,7 @@ class Game(object):
         """
         Returns current question and answers
         """
+        self.answered = []
         self.counter += 1
         if self.counter >= self.num_questions:
             return self.end_game()
@@ -68,6 +70,10 @@ class Game(object):
         is_correct = False
         response_message = ""
 
+        if number in self.answered:
+            return (False, "Your answer has already been recorded for this round")
+
+        self.answered.append(number)
         if number not in list(self.players.keys()):
             self.add_player(number)
         if answer not in ['1','2','3','4']:

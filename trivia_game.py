@@ -48,6 +48,8 @@ class Game(object):
         Returns current question and answers
         """
         self.counter += 1
+        if self.counter >= self.num_questions:
+            return self.end_game()
         current_question = self.questions[self.counter]['question']
         self.answers = self.questions[self.counter]['incorrect_answers'] + [(self.questions[self.counter]['correct_answer'])]
         shuffle(self.answers)
@@ -90,6 +92,9 @@ class Game(object):
         Return a string telling a certain player their score
         """
         return('You scored %d points. Good job!' % (self.players[number]))
+
+    def is_running(self):
+        return self.counter != -1
 
     def end_game(self):
         """

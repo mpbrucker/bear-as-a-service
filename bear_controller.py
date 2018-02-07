@@ -1,9 +1,8 @@
 import logging
 import os
-import random
 import string
-import sys
 import time
+import threading
 
 import click
 from trivia_game import Game
@@ -25,7 +24,10 @@ assert AUTH_TOKEN, 'Error: the TWILIO_AUTH_TOKEN is not set'
 assert PHONE_NUMBER, 'Error: the TWILIO_PHONE_NUMBER is not set'
 assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
 
-mqtt_client = mqtt_json.Client()
+topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
+mqtt_client = mqtt_json.Client(topic)
+game = Game(DB_PASSWORD)
+
 
 
 def parse_command(number, command, game):
@@ -38,14 +40,12 @@ def parse_command(number, command, game):
 
     translator = str.maketrans('', '', string.punctuation)
     sanitized_command = command.translate(translator) # Remove punctuation to avoid injection attacks
-    print(sanitized_command)
     command_words = sanitized_command.lower().split(maxsplit=1)
     if command_words[0] == 'trivia' and game.counter == -1:
         game.play_game()
         respond_bear("welcome to bear trivia tm")
         response_message = "Let's play trivia!"
-        next_q = game.get_next_question()
-        respond_bear(next_q)
+        next_question()
     elif game.counter != -1:
         answer = command_words[0]
         is_correct, response_message = game.handle_answer(number, answer)
@@ -55,6 +55,9 @@ def parse_command(number, command, game):
 
 
 def check_timeout(orig_time, timeout=45):
+    """
+    Checks whether the timeout period for a question has occurred.
+    """
     if time.time() - orig_time > timeout:
         return True
 
@@ -73,33 +76,45 @@ def respond_text(phone, message):
         from_=PHONE_NUMBER,
         body=message)
 
-@click.command()
-@click.option('--reply-text', default='Bear has spoken')
-def main(reply_text=None):
-    game = Game(DB_PASSWORD)
-    timeout_time = time.time()
-    logger.setLevel(logging.INFO)
-    topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
-    logger.info('Waiting for messages on {}'.format(topic))
+
+def time_up():
+    if game.is_running():
+        respond_bear("Time's up!")
+        next_question()
 
 
-    # Essentially functions as a while loop
-    for payload in mqtt_client.create_subscription_queue(topic):
+def next_question():
+    response_bear_text = game.get_next_question()
+    respond_bear(response_bear_text)
+    timeout_watcher = threading.Timer(30, time_up)
+    timeout_watcher.start()
 
-        if check_timeout(timeout_time, timeout=20) and game.counter != -1:  # If we hit the timeout for the current question, move to the new one
-            respond_bear("Time's up!")
-            response_bear_text = game.get_next_question()
-            respond_bear(response_bear_text)
-            timeout_time = time.time()
+
+
+def interact():
+    while True:
+        payload = mqtt_client.get_messages()
         if payload is not None:
+
             is_correct, text_response = parse_command(payload['From'], payload['Body'], game)
             response_number = payload['From']
             respond_text(response_number, text_response)
             if is_correct:
                 logging.info("Correct answer, moving to next question")
-                bear_text = game.get_next_question()
-                respond_bear("Correct answer! " + bear_text)
-                timeout_time = time.time()
+                next_question()
+
+
+timeout_watcher = threading.Timer(30, time_up)
+
+
+@click.command()
+@click.option('--reply-text', default='Bear has spoken')
+def main(reply_text=None):
+    logger.setLevel(logging.INFO)
+    logger.info('Starting bear trivia client on {}'.format(topic))
+    interact()
+
+
 
 
 if __name__ == '__main__':

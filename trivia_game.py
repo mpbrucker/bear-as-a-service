@@ -12,6 +12,7 @@ class Game(object):
         self.counter = -1
         self.players = dict()
         self.answers = []
+        self.answered = []
         self.db = DatabaseClient(database_name, database_password)
 
     def play_game(self):
@@ -31,7 +32,7 @@ class Game(object):
         """
         Grabs trivia json from Open Trivia DB API tool
         """
-        r = requests.get("https://opentdb.com/api.php?amount=%d&type=multiple" % self.num_questions)
+        r = requests.get("https://opentdb.com/api.php?amount=%d&category=9&type=multiple" % self.num_questions)
         self.questions = r.json()['results']
 
     def sort_questions(self):
@@ -47,6 +48,7 @@ class Game(object):
         """
         Returns current question and answers
         """
+        self.answered = []
         self.counter += 1
         current_question = self.questions[self.counter]['question']
         self.answers = self.questions[self.counter]['incorrect_answers'] + [(self.questions[self.counter]['correct_answer'])]
@@ -66,6 +68,10 @@ class Game(object):
         is_correct = False
         response_message = ""
 
+        if number in self.answered:
+            return (False, "Your answer has already been recorded for this round")
+
+        self.answered.append(number)
         if number not in list(self.players.keys()):
             self.add_player(number)
         if answer not in ['1','2','3','4']:

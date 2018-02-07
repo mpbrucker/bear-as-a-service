@@ -1,28 +1,37 @@
-# Bear-as-a-Service
-[![Build Status](https://travis-ci.org/olinlibrary/bear-as-a-service.svg?branch=master)](https://travis-ci.org/olinlibrary/bear-as-a-service)
-
-[![IMAGE ALT TEXT HERE](docs/images/bear-vimeo.jpg)](https://vimeo.com/248514938)
-
-- A Holiday Happening
-- [A Life Size Brown Cardboard Bear](https://www.amazon.com/Brown-Bear-Advanced-Graphics-Cardboard/dp/B00B03DT0O)
-- Keenan Zucker
-- Patrick Huston
+# Bear Trivia
 
 ## Quick Start (client only)
 
 This requires a running Bear server, and a [Twilio ⟶ MQTT Gateway](https://github.com/olin-build/twilio-mqtt-gateway).
 
-In class, you were given your Twilio phone number, and the credentials for
+You should also have a Twilio phone number, and the credentials for
 The Bear server and Twilio gateway.
 
 1. Follow the Install instructions below.
 2. Run `python3 examples/sms_bear_gateway.py`
 3. Send a text message to your Twilio phone number.
 
+
 ## Install
 
 Make sure you have a running Python 3.6. Earlier versions of Python 3.x might
 work too, but haven't been tested. Python 2.x is Right Out.
+
+### Postgres Setup
+
+Running Bear Trivia requires a running PostgreSQL server. Bear Trivia is designed to work with PostgreSQL 9.6, but earlier versions may work as well. Follow the instructions [here](https://wiki.postgresql.org/wiki/Detailed_installation_guides) to install PostgreSQL. Next, create the database:
+
+`createdb trivia`
+
+Now, create a user and grant privileges on the database:
+
+```
+$ sudo -u postgres psql
+CREATE USER bearclient WITH PASSWORD 'my_password';
+GRANT ALL PRIVILEGES ON DATABASE "trivia" to my_username;
+```
+
+Choose a password for `my_password`, and copy that value as `POSTGRES_KEY` in `envrc.template`.
 
 ### macOS and Linux
 
@@ -48,15 +57,13 @@ This adds entries to the Windows registry. You only need to do this once.
 
 ### All Platforms
 
-`pip3 install -r requirements.txt`
+To install dependencies:
 
-Send a test message. (Replace the number below by your own phone number.)
+`pipenv install`
 
-`python3 scripts/send_sms_message.py +16175551010`
+Start the Bear Trivia controller.
 
-Send a test message to the bear:
-
-`python3 mqtt_json/send_mqtt_message.py "forget about your worries"`
+`pipenv run python bear_controller.py`
 
 ## Run the Server
 

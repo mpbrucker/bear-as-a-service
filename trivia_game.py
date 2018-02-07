@@ -9,22 +9,22 @@ class Game(object):
     def __init__(self, database_password, database_name="trivia"):
         self.questions = []
         self.num_questions = 10
-        self.counter = -1
-        self.players = dict()
-        self.answers = []
-        self.answered = []
-        self.db = DatabaseClient(database_name, database_password)
+        self.counter = -1 # Current round number, -1 means game has not started
+        self.players = dict() # Keys = players' numbers, values = points
+        self.answers = [] # List of answers to the current question
+        self.answered = [] # List of players that have answered in the current round
+        self.db = DatabaseClient(database_name, database_password) # Setup database
 
     def play_game(self):
         """
-        Grabs and sorts questions
+        Calls functions needed to prep game
         """
         self.grab_questions()
         self.sort_questions()
 
     def add_player(self, number):
         """
-        Adds a new player to the players dictionary and give them a score of 0
+        Adds a new player to dictionary and give them a score of 0
         """
         self.players[number] = 0
 

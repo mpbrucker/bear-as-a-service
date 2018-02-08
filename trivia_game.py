@@ -1,5 +1,4 @@
 import requests
-import json
 from random import shuffle
 from db_client import DatabaseClient
 import html
@@ -15,8 +14,7 @@ class Game(object):
         Calls functions needed to prep game
         """
         self.questions = []
-        self.num_questions = 3
-        self.counter = -1 # Current round number, -1 means game has not started
+        self.num_questions = 10
         self.players = dict() # Keys = players' numbers, values = points
         self.answers = [] # List of answers to the current question
         self.answered = [] # List of players that have answered in the current round
@@ -51,13 +49,16 @@ class Game(object):
         """
         self.answered = []
         self.counter += 1
-        if self.counter >= self.num_questions:
+        if self.counter >= self.num_questions: # If we are at the end of the questions
             return self.end_game()
         current_question = self.questions[self.counter]['question']
         self.answers = self.questions[self.counter]['incorrect_answers'] + [(self.questions[self.counter]['correct_answer'])]
         shuffle(self.answers)
         answers_string = ', '.join(["%d: %s" % (n+1, q) for n, q in enumerate(self.answers)])
         return html.unescape("question " + str(self.counter+1) + '. ' + current_question + ' ' + answers_string)
+
+    def get_correct_answer(self):
+        return "The correct answer is {}".format(self.questions[self.counter]['correct_answer'])
 
     def handle_answer(self, number, answer):
         """
@@ -98,15 +99,18 @@ class Game(object):
         """
         Return a string telling a certain player their score
         """
-        return('You scored %d points. Good job!' % (self.players[number]))
+        cur_points = self.db.get_points(number)
+        if cur_points != 1:
+            return('You have {} points.'.format(cur_points))
+        else:
+            return('You have 1 point.')
 
     def is_running(self):
         return self.counter != -1
 
     def end_game(self):
         """
-        Clear game and return thanks for playing
+        Clear game and return a thanks message.
         """
         self.counter = -1 # Current round number, -1 means game has not started
-
         return('And that does it for trivia! Thanks for playing!')

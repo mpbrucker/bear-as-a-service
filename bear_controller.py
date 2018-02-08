@@ -36,7 +36,7 @@ def parse_command(number, command):
     Takes in a command input and takes action based on the command. Returns the text response message.
     """
     ## We need to parse the command
-    response_message = "bear has spoken"
+    response_message = "I don\'t recognize that command."
 
     translator = str.maketrans('', '', string.punctuation)
     sanitized_command = command.translate(translator) # Remove punctuation to avoid injection attacks
@@ -46,6 +46,8 @@ def parse_command(number, command):
         respond_bear("welcome to bear trivia tm")
         response_message = "Let's play trivia!"
         next_question()
+    elif command_words[0] == 'score':
+        response_message = game.score_player(number)
     elif game.is_running():
         answer = command_words[0]
         is_correct, response_message = game.handle_answer(number, answer)
@@ -91,6 +93,7 @@ def time_up(timeout, counter):
     lock.acquire()
     if game.is_running() and game.counter == counter: # If we're still on the same question as when the timer was created:
         respond_bear("Time's up!")
+        respond_bear(game.get_correct_answer())
         next_question(timeout)
     else:
         logging.info("Ending timer for question {}".format(counter+1))

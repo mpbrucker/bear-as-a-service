@@ -43,6 +43,8 @@ class DatabaseClient():
         """
         Updates the points of a single user in the database.
         """
-        db_command = "UPDATE users SET score={} WHERE phone=\'{}\'".format(points, phone)
+        new_points = self.get_points(phone) + points
+
+        db_command = "UPDATE users SET score={} WHERE phone=\'{}\'".format(new_points, phone)
         result_set = self.db.execute(db_command)
         return result_set

@@ -15,16 +15,15 @@ logger = logging.getLogger('messages')
 
 SEND_TOPIC = 'speak'
 
-ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
-AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
-PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
-DB_PASSWORD = os.getenv('POSTGRES_KEY')
-IS_REMOTE = os.getenv('DATABASE_URL')
+ACCOUNT_SID = os.environ.get('TWILIO_ACCOUNT_SID', None)
+AUTH_TOKEN = os.environ.get('TWILIO_AUTH_TOKEN', None)
+PHONE_NUMBER = os.environ.get('TWILIO_PHONE_NUMBER', None)
+DB_PASSWORD = os.environ.get('POSTGRES_KEY', None)
+IS_REMOTE = os.environ.get('DATABASE_URL', None)
 
 assert ACCOUNT_SID, 'Error: the TWILIO_ACCOUNT_SID is not set'
 assert AUTH_TOKEN, 'Error: the TWILIO_AUTH_TOKEN is not set'
 assert PHONE_NUMBER, 'Error: the TWILIO_PHONE_NUMBER is not set'
-assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
 
 topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
 mqtt_client = mqtt_json.Client(topic)
@@ -37,6 +36,7 @@ if IS_REMOTE: # If we are deployed to heroku, use remote credentials
     port = url.port
     game = Game(password, database_name=dbname, username=user, port=port, hostname=host)
 else:
+    assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
     game = Game(DB_PASSWORD)
 lock = threading.Lock()
 

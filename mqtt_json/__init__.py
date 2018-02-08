@@ -57,6 +57,9 @@ class Client():
                 print('MQTT:', err, file=sys.stderr)
                 print('Continuing without subscriptions', file=sys.stderr)
 
+        self.messages.queue.clear()
+
+
     def get_messages(self):
         """
         Retrieves the messages from the queue. If there are no messages, returns None.

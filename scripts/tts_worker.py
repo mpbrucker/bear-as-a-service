@@ -17,19 +17,21 @@ logger.setLevel(logging.INFO)
 
 SPEECH_COMMAND = 'say' if platform.system() == 'Darwin' else 'espeak'
 
-mqtt_client = mqtt_json.Client()
 
 
 @click.command()
 @click.option('--topic', default='speak')
 def main(topic):
-    for msg in mqtt_client.create_subscription_queue(topic):
-        message = msg['message']
-        logger.info(msg)
-        res = subprocess.run([SPEECH_COMMAND, message],
-                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        if res.returncode != 0:
-            logger.error(res.stderr.decode().strip())
+    mqtt_client = mqtt_json.Client(topic)
+    while True:
+        msg = mqtt_client.get_messages()
+        if msg:
+            message = msg['message']
+            logger.info(msg)
+            res = subprocess.run([SPEECH_COMMAND, message],
+                                 stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            if res.returncode != 0:
+                logger.error(res.stderr.decode().strip())
 
 if __name__ == '__main__':
     main()

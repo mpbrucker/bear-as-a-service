@@ -7,18 +7,19 @@ import html
 class Game(object):
 
     def __init__(self, database_password, database_name="trivia"):
-        self.questions = []
-        self.num_questions = 10
         self.counter = -1 # Current round number, -1 means game has not started
-        self.players = dict() # Keys = players' numbers, values = points
-        self.answers = [] # List of answers to the current question
-        self.answered = [] # List of players that have answered in the current round
         self.db = DatabaseClient(database_name, database_password) # Setup database
 
     def play_game(self):
         """
         Calls functions needed to prep game
         """
+        self.questions = []
+        self.num_questions = 3
+        self.counter = -1 # Current round number, -1 means game has not started
+        self.players = dict() # Keys = players' numbers, values = points
+        self.answers = [] # List of answers to the current question
+        self.answered = [] # List of players that have answered in the current round
         self.grab_questions()
         self.sort_questions()
 
@@ -56,7 +57,7 @@ class Game(object):
         self.answers = self.questions[self.counter]['incorrect_answers'] + [(self.questions[self.counter]['correct_answer'])]
         shuffle(self.answers)
         answers_string = ', '.join(["%d: %s" % (n+1, q) for n, q in enumerate(self.answers)])
-        return html.unescape(current_question + ' ' + answers_string)
+        return html.unescape("question " + str(self.counter+1) + '. ' + current_question + ' ' + answers_string)
 
     def handle_answer(self, number, answer):
         """
@@ -106,5 +107,6 @@ class Game(object):
         """
         Clear game and return thanks for playing
         """
-        self.__init__()
-        return('Thanks for playing!')
+        self.counter = -1 # Current round number, -1 means game has not started
+
+        return('And that does it for trivia! Thanks for playing!')

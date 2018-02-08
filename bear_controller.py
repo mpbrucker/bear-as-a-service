@@ -27,6 +27,7 @@ assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
 topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
 mqtt_client = mqtt_json.Client(topic)
 game = Game(DB_PASSWORD)
+lock = threading.Lock()
 
 
 
@@ -35,6 +36,7 @@ def parse_command(number, command):
     Takes in a command input and takes action based on the command. Returns the text response message.
     """
     ## We need to parse the command
+    response_message = "bear has spoken"
 
     translator = str.maketrans('', '', string.punctuation)
     sanitized_command = command.translate(translator) # Remove punctuation to avoid injection attacks
@@ -49,6 +51,7 @@ def parse_command(number, command):
         is_correct, response_message = game.handle_answer(number, answer)
         if is_correct:
             logging.info("Correct answer, moving to next question")
+            respond_bear("correct")
             next_question()
 
     return response_message
@@ -81,13 +84,17 @@ def respond_text(phone, message):
         body=message)
 
 
-def time_up(timeout):
+def time_up(timeout, counter):
     """
     A timer function that detects whether the time limit for a given question has passed.
     """
-    if game.is_running():
+    lock.acquire()
+    if game.is_running() and game.counter == counter: # If we're still on the same question as when the timer was created:
         respond_bear("Time's up!")
         next_question(timeout)
+    else:
+        logging.info("Ending timer for question {}".format(counter+1))
+    lock.release()
 
 
 def next_question(timeout=30):
@@ -96,8 +103,10 @@ def next_question(timeout=30):
     """
     response_bear_text = game.get_next_question()
     respond_bear(response_bear_text)
-    timeout_watcher = threading.Timer(timeout, time_up, [timeout])
+    timeout_watcher = threading.Timer(timeout, time_up, [timeout, game.counter])
     timeout_watcher.start()
+
+
 
 
 @click.command()

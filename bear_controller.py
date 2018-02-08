@@ -34,7 +34,7 @@ if IS_REMOTE:  # If we are deployed to heroku, use remote credentials
     password = url.password
     host = url.hostname
     port = url.port
-    game = Game(password, database_name=dbname, username=user, port=port, hostname=host)
+    game = Game(password, database_name=dbname, username=user, port=int(port), hostname=host)
 else:
     assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
     game = Game(DB_PASSWORD)

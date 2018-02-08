@@ -18,7 +18,6 @@ logger.setLevel(logging.INFO)
 SPEECH_COMMAND = 'say' if platform.system() == 'Darwin' else 'espeak'
 
 
-
 @click.command()
 @click.option('--topic', default='speak')
 def main(topic):
@@ -32,6 +31,7 @@ def main(topic):
                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             if res.returncode != 0:
                 logger.error(res.stderr.decode().strip())
+
 
 if __name__ == '__main__':
     main()

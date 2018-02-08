@@ -12,7 +12,7 @@ class Game(object):
         :param database_name: name of database
         """
         self.counter = -1 # Current round number, -1 means game has not started
-        self.db = DatabaseClient(database_name, database_password, kwargs) # Setup database
+        self.db = DatabaseClient(database_name, database_password, **kwargs) # Setup database
 
     def play_game(self):
         """

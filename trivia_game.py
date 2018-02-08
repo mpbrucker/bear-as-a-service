@@ -6,20 +6,13 @@ import html
 
 class Game(object):
 
-<<<<<<< HEAD
-    def __init__(self, database_password, database_name="trivia"):
+    def __init__(self, database_password, database_name="trivia", **kwargs):
         """
         :param database_password: password found in bear-secrets.txt
         :param database_name: name of database
         """
-
-        self.counter = -1  # Current round number, -1 means game has not started
-        self.db = DatabaseClient(database_name, database_password)  # Setup database
-=======
-    def __init__(self, database_password, database_name="trivia", **kwargs):
         self.counter = -1 # Current round number, -1 means game has not started
         self.db = DatabaseClient(database_name, database_password, *kwargs) # Setup database
->>>>>>> 9d77ef7354a3fc0ee2be95e1fb7e5c26901124d7
 
     def play_game(self):
         """

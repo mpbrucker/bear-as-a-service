@@ -27,7 +27,7 @@ assert PHONE_NUMBER, 'Error: the TWILIO_PHONE_NUMBER is not set'
 
 topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
 mqtt_client = mqtt_json.Client(topic)
-if IS_REMOTE: # If we are deployed to heroku, use remote credentials
+if IS_REMOTE:  # If we are deployed to heroku, use remote credentials
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
     dbname = url.path[1:]
     user = url.username

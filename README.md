@@ -1,4 +1,8 @@
 # Bear Trivia
+## Created by Isa Blancett and Matt Brucker
+
+Bear Trivia is a revolutionary new way to play trivia! Start a game of trivia with the bear, and he will ask you questions - send your answers via text, and earn points! Bear Trivia™ - it's fast, it's fun, and it's free.
+
 
 ## Quick Start (client only)
 

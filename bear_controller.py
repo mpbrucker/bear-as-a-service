@@ -3,6 +3,7 @@ import os
 import string
 import time
 import threading
+import urllib.parse as urlparse
 
 import click
 from trivia_game import Game
@@ -18,6 +19,7 @@ ACCOUNT_SID = os.getenv('TWILIO_ACCOUNT_SID')
 AUTH_TOKEN = os.getenv('TWILIO_AUTH_TOKEN')
 PHONE_NUMBER = os.getenv('TWILIO_PHONE_NUMBER')
 DB_PASSWORD = os.getenv('POSTGRES_KEY')
+IS_REMOTE = os.getenv('DATABASE_URL')
 
 assert ACCOUNT_SID, 'Error: the TWILIO_ACCOUNT_SID is not set'
 assert AUTH_TOKEN, 'Error: the TWILIO_AUTH_TOKEN is not set'
@@ -26,7 +28,16 @@ assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
 
 topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
 mqtt_client = mqtt_json.Client(topic)
-game = Game(DB_PASSWORD)
+if IS_REMOTE: # If we are deployed to heroku, use remote credentials
+    url = urlparse.urlparse(os.environ['DATABASE_URL'])
+    dbname = url.path[1:]
+    user = url.username
+    password = url.password
+    host = url.hostname
+    port = url.port
+    game = Game(password, database_name=dbname, username=user, port=port, hostname=host)
+else:
+    game = Game(DB_PASSWORD)
 lock = threading.Lock()
 
 
@@ -114,7 +125,8 @@ def next_question(timeout=30):
 
 @click.command()
 @click.option('--reply-text', default='Bear has spoken')
-def main(reply_text=None):
+@click.option('--remote-db', is_flag=True)
+def main(reply_text=None, remote_db=False):
     """
     Handles the main control loop of bear interaction.
     """

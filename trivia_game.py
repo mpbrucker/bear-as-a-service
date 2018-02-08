@@ -5,9 +5,9 @@ import html
 
 class Game(object):
 
-    def __init__(self, database_password, database_name="trivia"):
+    def __init__(self, database_password, database_name="trivia", **kwargs):
         self.counter = -1 # Current round number, -1 means game has not started
-        self.db = DatabaseClient(database_name, database_password) # Setup database
+        self.db = DatabaseClient(database_name, database_password, *kwargs) # Setup database
 
     def play_game(self):
         """

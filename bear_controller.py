@@ -41,25 +41,24 @@ else:
 lock = threading.Lock()
 
 
-
 def parse_command(number, command):
     """
     Takes in a command input and takes action based on the command. Returns the text response message.
     """
-    ## We need to parse the command
+    # We need to parse the command
     response_message = "I don\'t recognize that command."
 
     translator = str.maketrans('', '', string.punctuation)
-    sanitized_command = command.translate(translator) # Remove punctuation to avoid injection attacks
+    sanitized_command = command.translate(translator)  # Remove punctuation to avoid injection attacks
     command_words = sanitized_command.lower().split(maxsplit=1)
-    if command_words[0] == 'trivia' and not game.is_running(): # Start a new game
+    if command_words[0] == 'trivia' and not game.is_running:  # Start a new game
         game.play_game()
         respond_bear("welcome to bear trivia tm")
         response_message = "Let's play trivia!"
         next_question()
     elif command_words[0] == 'score':
         response_message = game.score_player(number)
-    elif game.is_running():
+    elif game.is_running:
         answer = command_words[0]
         is_correct, response_message = game.handle_answer(number, answer)
         if is_correct:
@@ -102,9 +101,10 @@ def time_up(timeout, counter):
     A timer function that detects whether the time limit for a given question has passed.
     """
     lock.acquire()
-    if game.is_running() and game.counter == counter: # If we're still on the same question as when the timer was created:
+    if game.is_running and game.counter == counter:
+        #  If we're still on the same question as when the timer was created:
         respond_bear("Time's up!")
-        respond_bear(game.get_correct_answer())
+        respond_bear(game.get_correct_answer)
         next_question(timeout)
     else:
         logging.info("Ending timer for question {}".format(counter+1))
@@ -115,12 +115,10 @@ def next_question(timeout=30):
     """
     Moves on to the next question. Handles the resetting of the timer and the processing of the next question.
     """
-    response_bear_text = game.get_next_question()
+    response_bear_text = game.get_next_question
     respond_bear(response_bear_text)
     timeout_watcher = threading.Timer(timeout, time_up, [timeout, game.counter])
     timeout_watcher.start()
-
-
 
 
 @click.command()
@@ -134,12 +132,10 @@ def main(reply_text=None, remote_db=False):
     logger.info('Starting bear trivia client on {}'.format(topic))
     while True:
         payload = mqtt_client.get_messages()
-        if payload is not None: # If there are new messages
+        if payload is not None:  # If there are new messages
             text_response = parse_command(payload['From'], payload['Body'])
             response_number = payload['From']
             respond_text(response_number, text_response)
-
-
 
 
 if __name__ == '__main__':

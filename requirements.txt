@@ -13,3 +13,4 @@ profanityfilter~=2.0.3
 
 # SQL queries
 sqlalchemy
+psycopg2

@@ -38,7 +38,7 @@ else:
     assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
     game = Game(DB_PASSWORD)
 lock = threading.Lock()
-mqtt_client = mqtt_json.Client(topic, game)
+mqtt_client = mqtt_json.Client(topic, game.counter)
 
 
 def parse_command(number, command, question=0):
@@ -133,9 +133,9 @@ def main(reply_text=None, remote_db=False):
     logger.setLevel(logging.INFO)
     logger.info('Starting bear trivia client on {}'.format(topic))
     while True:
-        question_num, payload = mqtt_client.get_messages()
+        payload = mqtt_client.get_messages()
         if payload is not None:  # If there are new messages
-            text_response = parse_command(payload['From'], payload['Body'], question=question_num)
+            text_response = parse_command(payload['From'], payload['Body'], question=payload['QuestionNum'])
             response_number = payload['From']
             respond_text(response_number, text_response)
 

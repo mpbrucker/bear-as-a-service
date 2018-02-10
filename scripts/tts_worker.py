@@ -15,7 +15,7 @@ logger = logging.getLogger('speaker')
 logger.setLevel(logging.INFO)
 
 
-SPEECH_COMMAND = 'say' if platform.system() == 'Darwin' else 'espeak'
+SPEECH_COMMAND = 'say' if platform.system() == 'Darwin' else 'espeak -p0'
 
 
 @click.command()

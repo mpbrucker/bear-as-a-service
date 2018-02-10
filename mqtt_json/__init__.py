@@ -14,9 +14,10 @@ logger = logging.getLogger('messages')
 
 
 class Client():
-    def __init__(self, topic):
+    def __init__(self, topic, game_controller):
         self.messages = queue.Queue()
         self.client = self.create_client(topic)
+        self.controller = game_controller
 
     def create_client(self, topic):
         """
@@ -32,7 +33,7 @@ class Client():
 
         def on_message(client, userdata, msg):
             logger.info('message topic=%s timestamp=%s payload=%s', msg.topic, msg.timestamp, msg.payload)
-            self.messages.put(msg)
+            self.messages.put((msg, self.controller.counter)) # Record the current question when the message waas received
 
         def on_publish(client, userdata, rc):
             logger.info('published result code=%s', rc)
@@ -64,12 +65,14 @@ class Client():
         Retrieves the messages from the queue. If there are no messages, returns None.
         """
         try:
-            payload = json.loads(self.messages.get(block=False).payload.decode('utf-8'))
+            (msg, counter) = self.messages.get(block=False)
+            print(counter)
+            payload = json.loads(msg.payload.decode('utf-8'))
             payload = {k: v[0] if isinstance(v, list) and len(v) == 1 else v
                        for k, v in payload.items()}
-            return payload
+            return (counter, payload)
         except queue.Empty:
-            return None
+            return None, None
 
     def publish(self, topic, **payload):
         """

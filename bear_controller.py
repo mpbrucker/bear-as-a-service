@@ -26,7 +26,6 @@ assert AUTH_TOKEN, 'Error: the TWILIO_AUTH_TOKEN is not set'
 assert PHONE_NUMBER, 'Error: the TWILIO_PHONE_NUMBER is not set'
 
 topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
-mqtt_client = mqtt_json.Client(topic)
 if IS_REMOTE:  # If we are deployed to heroku, use remote credentials
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
     dbname = url.path[1:]
@@ -39,9 +38,10 @@ else:
     assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
     game = Game(DB_PASSWORD)
 lock = threading.Lock()
+mqtt_client = mqtt_json.Client(topic, game)
 
 
-def parse_command(number, command):
+def parse_command(number, command, question=0):
     """
     Takes in a command input and takes action based on the command. Returns the text response message.
     """
@@ -58,7 +58,7 @@ def parse_command(number, command):
         next_question()
     elif command_words[0] == 'score':
         response_message = game.score_player(number)
-    elif game.is_running:
+    elif game.is_running and game.counter == question: # If the game is running, AND the answer is for the current question:
         answer = command_words[0]
         is_correct, response_message = game.handle_answer(number, answer)
         if is_correct:
@@ -81,7 +81,8 @@ def respond_bear(speech):
     """
     Send a message to the bear.
     """
-    mqtt_client.publish(SEND_TOPIC, message=speech)
+    out_message = speech + ' 🐻'
+    mqtt_client.publish(SEND_TOPIC, message=out_message)
 
 
 def respond_text(phone, message):
@@ -115,10 +116,11 @@ def next_question(timeout=30):
     """
     Moves on to the next question. Handles the resetting of the timer and the processing of the next question.
     """
-    response_bear_text = game.get_next_question
+    response_bear_text = game.get_next_question()
     respond_bear(response_bear_text)
     timeout_watcher = threading.Timer(timeout, time_up, [timeout, game.counter])
     timeout_watcher.start()
+
 
 
 @click.command()
@@ -131,9 +133,9 @@ def main(reply_text=None, remote_db=False):
     logger.setLevel(logging.INFO)
     logger.info('Starting bear trivia client on {}'.format(topic))
     while True:
-        payload = mqtt_client.get_messages()
+        question_num, payload = mqtt_client.get_messages()
         if payload is not None:  # If there are new messages
-            text_response = parse_command(payload['From'], payload['Body'])
+            text_response = parse_command(payload['From'], payload['Body'], question=question_num)
             response_number = payload['From']
             respond_text(response_number, text_response)
 

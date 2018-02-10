@@ -14,7 +14,7 @@ logger = logging.getLogger('messages')
 
 
 class Client():
-    def __init__(self, topic, counter):
+    def __init__(self, topic, counter=None):
         self.messages = queue.Queue()
         self.client = self.create_client(topic, counter)
 
@@ -32,7 +32,10 @@ class Client():
 
         def on_message(client, userdata, msg):
             logger.info('message topic=%s timestamp=%s payload=%s', msg.topic, msg.timestamp, msg.payload)
-            self.messages.put((msg, counter())) # Record the current question when the message waas received
+            question_num = -1
+            if counter is not None:
+                question_num = counter()
+            self.messages.put((msg, question_num)) # Record the current question when the message waas received
 
         def on_publish(client, userdata, rc):
             logger.info('published result code=%s', rc)

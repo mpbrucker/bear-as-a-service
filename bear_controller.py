@@ -104,6 +104,7 @@ def time_up(timeout, counter):
     if game.is_running and game.counter == counter:
         #  If we're still on the same question as when the timer was created:
         respond_bear("Time's up!")
+        respond_bear(game.get_correct_answer) # Say the correct answer
         next_question(timeout)
     else:
         logging.info("Ending timer for question {}".format(counter+1))
@@ -114,7 +115,6 @@ def next_question(timeout=30):
     """
     Moves on to the next question. Handles the resetting of the timer and the processing of the next question.
     """
-    respond_bear(game.get_correct_answer) # Say the correct answer
     response_bear_text = game.get_next_question
     respond_bear(response_bear_text)
     timeout_watcher = threading.Timer(timeout, time_up, [timeout, game.counter])
@@ -134,7 +134,7 @@ def main(reply_text=None, remote_db=False):
     while True:
         payload = mqtt_client.get_messages()
         if payload is not None:  # If there are new messages
-            cur_number = payload['From'][-4:] # Store users by last 4 digits of number
+            cur_number = payload['From'][-4:]  # Store users by last 4 digits of number
 
             text_response = parse_command(cur_number, payload['Body'], question=payload['QuestionNum'])
             response_number = payload['From']

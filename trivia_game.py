@@ -99,19 +99,19 @@ class Game(object):
         response_message = ""
 
         if number in self.answered:
-            return False, "Your answer has already been recorded for this round"
+            return False, "Your answer has already been recorded for this round 🐻"
 
         self.answered.append(number)
         if number not in list(self.players.keys()):
             self.add_player(number)
         if answer not in ['1', '2', '3', '4']:
-            response_message = 'That is not a number between 1 and 4'
+            response_message = 'That is not a number between 1 and 4 🐻'
         elif self.answers[int(answer)-1] == self.questions[self.counter]['correct_answer']:
             self.add_point(number)
-            response_message = 'Yay! That is correct!'
+            response_message = 'Yay! That is correct! 🍯'
             is_correct = True
         else:
-            response_message = 'Aw that was wrong!'
+            response_message = 'Aw that was wrong! 🐝'
         return is_correct, response_message
 
     def add_point(self, number):
@@ -135,9 +135,9 @@ class Game(object):
 
         cur_points = self.db.get_points(number)
         if cur_points != 1:
-            return 'You have {} points.'.format(cur_points)
+            return 'You have {} points. 🐻'.format(cur_points)
         else:
-            return 'You have 1 point.'
+            return 'You have 1 point. 🐻'
 
     @property
     def is_running(self):
@@ -160,3 +160,6 @@ class Game(object):
 
         self.counter = -1  # Current round number, -1 means game has not started
         return 'And that does it for trivia! Thanks for playing!'
+
+    def get_question(self):
+        return self.counter+1

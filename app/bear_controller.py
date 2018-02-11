@@ -124,7 +124,6 @@ def next_question(timeout=30):
 
 @click.command()
 @click.option('--reply-text', default='Bear has spoken')
-@click.option('--remote-db', is_flag=True)
 def main(reply_text=None, remote_db=False):
     """
     Handles the main control loop of bear interaction.

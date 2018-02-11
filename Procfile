@@ -1,1 +1,1 @@
-worker: python bear_controller.py --remote-db
+worker: python bear_controller.py 

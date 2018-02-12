@@ -1,3 +1,9 @@
+"""
+Authors: Matt Brucker & Isa Blancett
+Adapted from: https://github.com/olinlibrary/bear-as-a-service
+Methods to update and access scoreboard
+"""
+
 import sqlalchemy
 import logging
 

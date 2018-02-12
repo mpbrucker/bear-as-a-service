@@ -1,9 +1,18 @@
+"""
+Authors: Matt Brucker & Isa Blancett
+Adapted from: https://github.com/olinlibrary/bear-as-a-service
+Handles text inputs and replies, times trivia game, and sends updates to db_client.py
+"""
+
 import logging
 import os
 import string
 import time
 import threading
-import urllib.parse as urlparse
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    from urlparse import urlparse
 
 import click
 from trivia_game import Game

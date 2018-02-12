@@ -1,3 +1,9 @@
+"""
+Authors: Matt Brucker & Isa Blancett
+Adapted from: https://github.com/olinlibrary/bear-as-a-service
+Methods to grab trivia questions and conduct game
+"""
+
 import requests
 from random import shuffle
 from db_client import DatabaseClient
@@ -11,8 +17,8 @@ class Game(object):
         :param database_password: password found in bear-secrets.txt
         :param database_name: name of database
         """
-        self.counter = -1 # Current round number, -1 means game has not started
-        self.db = DatabaseClient(database_name, database_password, *kwargs) # Setup database
+        self.counter = -1  # Current round number, -1 means game has not started
+        self.db = DatabaseClient(database_name, database_password, *kwargs)  # Setup database
 
     def play_game(self):
         """
@@ -69,10 +75,10 @@ class Game(object):
             return self.end_game
         current_question = self.questions[self.counter]['question']
         self.answers = self.questions[self.counter]['incorrect_answers'] + \
-            [(self.questions[self.counter]['correct_answer'])]
+                       [(self.questions[self.counter]['correct_answer'])]
         shuffle(self.answers)
-        answers_string = ', '.join(["%d: %s" % (n+1, q) for n, q in enumerate(self.answers)])
-        return html.unescape("question " + str(self.counter+1) + '. ' + current_question + ' ' + answers_string)
+        answers_string = ', '.join(["%d: %s" % (n + 1, q) for n, q in enumerate(self.answers)])
+        return html.unescape("question " + str(self.counter + 1) + '. ' + current_question + ' ' + answers_string)
 
     @property
     def get_correct_answer(self):
@@ -106,7 +112,7 @@ class Game(object):
             self.add_player(number)
         if answer not in ['1', '2', '3', '4']:
             response_message = 'That is not a number between 1 and 4'
-        elif self.answers[int(answer)-1] == self.questions[self.counter]['correct_answer']:
+        elif self.answers[int(answer) - 1] == self.questions[self.counter]['correct_answer']:
             self.add_point(number)
             response_message = 'Yay! That is correct!'
             is_correct = True

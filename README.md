@@ -82,6 +82,16 @@ To setup a basic PostgreSQL database in Heroku, run `heroku addons:create heroku
 
 Once everything has been set up, run `git push heroku master` to push the app to Heroku.
 
+## Bear Speech Setup
+
+In order to run the bear speech server, you need to have [espeak](http://espeak.sourceforge.net/) (Linux only, on macOS it uses the builtin speech functionality):
+
+```
+sudo apt-get install espeak
+```
+
+Run the steps for "Environment Setup" above. Then, to run the bear speech client, run `pipenv run python tts_worker.py`. Now, the bear client will listen for messages from the trivia game, whether it's running locally or deployed to Heroku.
+
 
 ## Acknowledgements
 

@@ -103,3 +103,4 @@ ENV/
 bear-secrets.txt
 .pytest_cache
 Pipfile.lock
+.idea/

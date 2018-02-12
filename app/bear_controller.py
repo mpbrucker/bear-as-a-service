@@ -35,7 +35,6 @@ assert AUTH_TOKEN, 'Error: the TWILIO_AUTH_TOKEN is not set'
 assert PHONE_NUMBER, 'Error: the TWILIO_PHONE_NUMBER is not set'
 
 topic = 'incoming-sms-' + PHONE_NUMBER.strip('+')
-mqtt_client = mqtt_json.Client(topic)
 if IS_REMOTE:  # If we are deployed to heroku, use remote credentials
     url = urlparse.urlparse(os.environ['DATABASE_URL'])
     dbname = url.path[1:]
@@ -43,19 +42,20 @@ if IS_REMOTE:  # If we are deployed to heroku, use remote credentials
     password = url.password
     host = url.hostname
     port = url.port
-    game = Game(password, database_name=dbname, username=user, port=port, hostname=host)
+    game = Game(password, database_name=dbname, username=user, port=int(port), hostname=host)
 else:
     assert DB_PASSWORD, 'Error: the POSTGRES_KEY is not set'
     game = Game(DB_PASSWORD)
 lock = threading.Lock()
+mqtt_client = mqtt_json.Client(topic, game.get_question)
 
 
-def parse_command(number, command):
+def parse_command(number, command, question=0):
     """
     Takes in a command input and takes action based on the command. Returns the text response message.
     """
     # We need to parse the command
-    response_message = "I don\'t recognize that command."
+    response_message = "I don\'t recognize that command. 🐻"
 
     translator = str.maketrans('', '', string.punctuation)
     sanitized_command = command.translate(translator)  # Remove punctuation to avoid injection attacks
@@ -63,11 +63,11 @@ def parse_command(number, command):
     if command_words[0] == 'trivia' and not game.is_running:  # Start a new game
         game.play_game()
         respond_bear("welcome to bear trivia tm")
-        response_message = "Let's play trivia!"
+        response_message = "Let's play trivia! 🐻"
         next_question()
     elif command_words[0] == 'score':
         response_message = game.score_player(number)
-    elif game.is_running:
+    elif game.is_running and game.get_question() == question: # If the game is running, AND the answer is for the current question:
         answer = command_words[0]
         is_correct, response_message = game.handle_answer(number, answer)
         if is_correct:
@@ -78,7 +78,7 @@ def parse_command(number, command):
     return response_message
 
 
-def check_timeout(orig_time, timeout=45):
+def check_timeout(orig_time, timeout=30):
     """
     Checks whether the timeout period for a question has occurred.
     """
@@ -113,7 +113,7 @@ def time_up(timeout, counter):
     if game.is_running and game.counter == counter:
         #  If we're still on the same question as when the timer was created:
         respond_bear("Time's up!")
-        respond_bear(game.get_correct_answer)
+        respond_bear(game.get_correct_answer) # Say the correct answer
         next_question(timeout)
     else:
         logging.info("Ending timer for question {}".format(counter+1))
@@ -130,9 +130,9 @@ def next_question(timeout=30):
     timeout_watcher.start()
 
 
+
 @click.command()
 @click.option('--reply-text', default='Bear has spoken')
-@click.option('--remote-db', is_flag=True)
 def main(reply_text=None, remote_db=False):
     """
     Handles the main control loop of bear interaction.
@@ -142,7 +142,9 @@ def main(reply_text=None, remote_db=False):
     while True:
         payload = mqtt_client.get_messages()
         if payload is not None:  # If there are new messages
-            text_response = parse_command(payload['From'], payload['Body'])
+            cur_number = payload['From'][-4:]  # Store users by last 4 digits of number
+
+            text_response = parse_command(cur_number, payload['Body'], question=payload['QuestionNum'])
             response_number = payload['From']
             respond_text(response_number, text_response)
 

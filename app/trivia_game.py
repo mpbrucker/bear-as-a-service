@@ -17,8 +17,13 @@ class Game(object):
         :param database_password: password found in bear-secrets.txt
         :param database_name: name of database
         """
+<<<<<<< HEAD:trivia_game.py
         self.counter = -1  # Current round number, -1 means game has not started
         self.db = DatabaseClient(database_name, database_password, *kwargs)  # Setup database
+=======
+        self.counter = -1 # Current round number, -1 means game has not started
+        self.db = DatabaseClient(database_name, database_password, **kwargs) # Setup database
+>>>>>>> 39424bbb4a0f56bf58a4855cbb8481c5c7f827ad:app/trivia_game.py
 
     def play_game(self):
         """
@@ -103,21 +108,29 @@ class Game(object):
 
         is_correct = False
         response_message = ""
-
-        if number in self.answered:
-            return False, "Your answer has already been recorded for this round"
-
-        self.answered.append(number)
-        if number not in list(self.players.keys()):
-            self.add_player(number)
         if answer not in ['1', '2', '3', '4']:
+<<<<<<< HEAD:trivia_game.py
             response_message = 'That is not a number between 1 and 4'
         elif self.answers[int(answer) - 1] == self.questions[self.counter]['correct_answer']:
             self.add_point(number)
             response_message = 'Yay! That is correct!'
             is_correct = True
+=======
+            response_message = 'That is not a number between 1 and 4 🐻'
+>>>>>>> 39424bbb4a0f56bf58a4855cbb8481c5c7f827ad:app/trivia_game.py
         else:
-            response_message = 'Aw that was wrong!'
+            if number in self.answered:
+                return False, "Your answer has already been recorded for this round 🐻"
+            self.answered.append(number)
+            if number not in list(self.players.keys()):
+                self.add_player(number)
+
+            elif self.answers[int(answer)-1] == self.questions[self.counter]['correct_answer']:
+                self.add_point(number)
+                response_message = 'Yay! That is correct! 🍯'
+                is_correct = True
+            else:
+                response_message = 'Aw that was wrong! 🐝'
         return is_correct, response_message
 
     def add_point(self, number):
@@ -141,9 +154,9 @@ class Game(object):
 
         cur_points = self.db.get_points(number)
         if cur_points != 1:
-            return 'You have {} points.'.format(cur_points)
+            return 'You have {} points. 🐻'.format(cur_points)
         else:
-            return 'You have 1 point.'
+            return 'You have 1 point. 🐻'
 
     @property
     def is_running(self):
@@ -166,3 +179,6 @@ class Game(object):
 
         self.counter = -1  # Current round number, -1 means game has not started
         return 'And that does it for trivia! Thanks for playing!'
+
+    def get_question(self):
+        return self.counter+1

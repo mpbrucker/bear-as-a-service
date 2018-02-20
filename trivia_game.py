@@ -104,11 +104,10 @@ class Game(object):
         is_correct = False
         response_message = ""
         if answer not in ['1', '2', '3', '4']:
-            response_message = 'That is not a number between 1 and 4'
+            response_message = 'That is not a number between 1 and 4 🐻'
         elif self.answers[int(answer) - 1] == self.questions[self.counter]['correct_answer']:
             self.add_point(number)
             is_correct = True
-            response_message = 'That is not a number between 1 and 4 🐻'
         else:
             if number in self.answered:
                 return False, "Your answer has already been recorded for this round 🐻"
